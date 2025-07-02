@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoHost JSON Converter</title>
+  <style>
+    body {
+      background-color: black;
+      color: #0f0;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 2rem;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      background: black;
+      color: #0f0;
+      border: 1px solid #0f0;
+      font-size: 1rem;
+    }
+    button {
+      cursor: pointer;
+    }
+    pre {
+      border: 1px solid #0f0;
+      padding: 1rem;
+      background: black;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧮 CryptoHost JSON Converter</h1>
+  <p>Convert funds to JSON format for use with Alchemy or CryptoHost API:</p>
+
+  <input type="text" id="walletName" placeholder="Wallet Name">
+  <input type="number" id="amount" placeholder="Amount to Convert">
+  <select id="currency">
+    <option value="ETH">ETH</option>
+    <option value="BTC">BTC</option>
+    <option value="USDC">USDC</option>
+    <option value="USDT">USDT</option>
+  </select>
+  <button onclick="generateJSON()">🔁 Generate JSON Payload</button>
+  <button onclick="copyJSON()">📋 Copy to Clipboard</button>
+  <pre id="jsonOutput">{}</pre>
+
+  <script>
+    function generateJSON() {
+      const wallet = document.getElementById('walletName').value.trim();
+      const amount = parseFloat(document.getElementById('amount').value);
+      const currency = document.getElementById('currency').value;
+      if (!wallet || isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid wallet name and amount.');
+        return;
+      }
+      const payload = {
+        wallet: wallet,
+        amount: amount,
+        currency: currency,
+        timestamp: new Date().toISOString()
+      };
+      document.getElementById('jsonOutput').textContent = JSON.stringify(payload, null, 2);
+    }
+
+    function copyJSON() {
+      const text = document.getElementById('jsonOutput').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('JSON copied to clipboard');
+      }, () => {
+        alert('Failed to copy JSON');
+      });
+    }
+  </script>
+</body>
+</html>
