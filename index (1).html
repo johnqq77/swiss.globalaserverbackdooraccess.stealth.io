@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Matrix USDT Flash Sender</title>
+  <script src="https://cdn.jsdelivr.net/npm/tronweb@4.4.0/dist/TronWeb.js"></script>
+  <style>
+    body {
+      background-color: black;
+      color: #00FF00;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #111;
+      border: 2px solid #00FF00;
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 400px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: none;
+      background: #222;
+      color: #00FF00;
+      font-size: 1rem;
+    }
+    button {
+      background: #00FF00;
+      color: black;
+      font-weight: bold;
+    }
+    .result {
+      margin-top: 1rem;
+      white-space: pre-wrap;
+    }
+    #app, #login { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container" id="login">
+    <h1>🔐 Enter PIN</h1>
+    <input type="password" id="pin" placeholder="Enter 6-digit PIN" />
+    <button onclick="verifyPIN()">Unlock</button>
+    <div class="result" id="loginResult"></div>
+  </div>
+
+  <div class="container" id="app">
+    <h1>💥 USDT Flash Sender 💥</h1>
+    <select id="chain">
+      <option value="tron">TRON (TRC-20)</option>
+      <option value="ethereum">Ethereum (ERC-20)</option>
+      <option value="bsc">Binance Smart Chain (BEP-20)</option>
+    </select>
+    <input type="text" id="wallet" placeholder="Recipient Wallet Address" />
+    <input type="number" id="amount" placeholder="Amount (USDT)" />
+    <input type="text" id="privateKey" placeholder="Your Private Key (never saved)" />
+    <button onclick="sendUSDT()">Send USDT</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const correctPIN = "199872";
+
+    function verifyPIN() {
+      const pin = document.getElementById("pin").value;
+      const result = document.getElementById("loginResult");
+      if (pin === correctPIN) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("app").style.display = "block";
+      } else {
+        result.textContent = "❌ Incorrect PIN";
+      }
+    }
+
+    async function sendUSDT() {
+      const chain = document.getElementById("chain").value;
+      const wallet = document.getElementById("wallet").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      const privateKey = document.getElementById("privateKey").value;
+      const resultDiv = document.getElementById("result");
+
+      if (!wallet || !amount || !privateKey) {
+        resultDiv.textContent = "❌ All fields are required.";
+        return;
+      }
+
+      let fullHost = "";
+      let usdtAddress = "";
+
+      if (chain === "tron") {
+        fullHost = "https://api.trongrid.io";
+        usdtAddress = "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj";
+      } else if (chain === "ethereum") {
+        resultDiv.textContent = "🔧 ERC-20 logic coming soon. Use TRON for now.";
+        return;
+      } else if (chain === "bsc") {
+        resultDiv.textContent = "🔧 BEP-20 logic coming soon. Use TRON for now.";
+        return;
+      }
+
+      const tronWeb = new TronWeb({ fullHost, privateKey });
+
+      try {
+        const contract = await tronWeb.contract().at(usdtAddress);
+        const tx = await contract.transfer(wallet, tronWeb.toSun(amount)).send();
+        resultDiv.textContent = "✅ Success! TX Hash: " + tx;
+      } catch (err) {
+        resultDiv.textContent = "❌ Error: " + err.message;
+      }
+    }
+
+    document.getElementById("login").style.display = "block";
+  </script>
+</body>
+</html>
